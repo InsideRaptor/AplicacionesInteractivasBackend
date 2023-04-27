@@ -1,6 +1,7 @@
 package com.example.tp.services;
 
 import com.example.tp.models.Libro;
+import com.example.tp.models.LibroDTO;
 import com.example.tp.repositories.LibroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class LibroService {
     private final LibroRepository lr;
 
     @Autowired
-    public LibroService(LibroRepository lr){
+    public LibroService(LibroRepository lr) {
         this.lr = lr;
     }
 
@@ -40,14 +41,14 @@ public class LibroService {
         return lr.findAll().size();
     }
 
-    public ResponseEntity updateLibro(Integer id, Libro l) {
+    public ResponseEntity updateLibro(Integer id, Libro libro) {
         try {
-            Libro li = lr.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
-            li.setTitulo(li.getTitulo());
-            li.setAutor(li.getAutor());
-            li.setEditorial(li.getEditorial());
-            lr.save(li);
-            return ResponseEntity.status(OK).build();
+            Libro l = lr.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
+            l.setTitulo(l.getTitulo());
+            l.setAutor(l.getAutor());
+            l.setEditorial(l.getEditorial());
+            lr.save(l);
+            return ResponseEntity.ok(lr.save(l));
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
         }
@@ -63,10 +64,10 @@ public class LibroService {
     }
 
     public Libro getLibro(Integer id) {
-        return lr.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
+        return lr.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro" + getLibro(id).getTitulo() + "no encontrado"));
     }
 
-    public Libro getByAutor(String autor) {
-        return (Libro) Arrays.stream(lr.findAll().toArray()).filter(l -> ((Libro) l).getAutor().equals(autor)).findFirst().orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
+    public LibroDTO getByAutor(String autor) {
+        return (LibroDTO) Arrays.stream(lr.findAll().toArray()).filter(l -> ((Libro) l).getAutor().equals(autor)).findFirst().orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
     }
 }
