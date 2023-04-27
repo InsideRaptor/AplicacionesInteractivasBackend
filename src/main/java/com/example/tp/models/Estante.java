@@ -13,14 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor(force = true)
 @Entity
-@Table(name = "Estante")
 public class Estante {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Estante_id")
     private String id;
     @NotNull
-    @Column(name = "Capacidad")
     private String capacidad;
     @NotNull
     @Column(name = "Libros")
