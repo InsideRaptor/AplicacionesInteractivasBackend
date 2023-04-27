@@ -1,6 +1,7 @@
 package com.example.tp.controllers;
 
 import com.example.tp.models.Libro;
+import com.example.tp.models.LibroDTO;
 import com.example.tp.services.LibroService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class LibroController {
     }
 
     @PostMapping("/{id}/update")
-    public ResponseEntity updateZapatilla(@PathVariable final @NotNull Integer id, @RequestBody final @NotNull Libro l) {
+    public ResponseEntity updateLibro(@PathVariable final @NotNull Integer id, @RequestBody final @NotNull Libro l) {
         return ls.updateLibro(id, l);
     }
 
@@ -46,8 +47,8 @@ public class LibroController {
         return ls.getLibro(id);
     }
 
-    @GetMapping("/dni/{dni}")
-    public Libro getByAutor(@PathVariable final @NotNull String autor) {
+    @GetMapping("/autor/{autor}")
+    public LibroDTO getByAutor(@PathVariable final @NotNull String autor) {
         return ls.getByAutor(autor);
     }
 }
