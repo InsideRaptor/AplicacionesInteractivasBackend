@@ -17,7 +17,7 @@ public class Estante {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Estante_id")
-    private String id;
+    private int id;
     @NotNull
     private String capacidad;
     @NotNull
