@@ -24,7 +24,7 @@ public class Libro {
     @NotNull
     private String editorial;
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Estante_id")
     private Estante estante;
 }
