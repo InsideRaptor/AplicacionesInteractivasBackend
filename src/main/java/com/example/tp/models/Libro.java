@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id")
+    @Column(name = "Libro_id")
     private int id;
     @NotNull
     @Column(name = "Titulo")
@@ -31,6 +31,6 @@ public class Libro {
     @NotNull
     @Column(name = "Estante")
     @ManyToOne
-    @JoinColumn(name = "Libros")
+    @JoinColumn(name = "Estante_id")
     private Estante estante;
 }
