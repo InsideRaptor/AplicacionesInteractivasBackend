@@ -16,12 +16,9 @@ import java.util.List;
 public class Estante {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Estante_id")
     private int id;
-    @NotNull
+    @Column(nullable = false)
     private String capacidad;
-    @NotNull
-    @Column(name = "Libros")
     @OneToMany(mappedBy = "estante")
     @JsonIgnore
     private List<Libro> listaLibros;

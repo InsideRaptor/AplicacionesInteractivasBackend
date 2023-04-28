@@ -13,18 +13,16 @@ import org.jetbrains.annotations.NotNull;
 public class Libro {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Libro_id")
     private int id;
-    @NotNull
+    @Column(nullable = false)
     private String titulo;
-    @NotNull
+    @Column(nullable = false)
     private String descripcion;
-    @NotNull
+    @Column(nullable = false)
     private String autor;
-    @NotNull
+    @Column(nullable = false)
     private String editorial;
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Estante_id")
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id", nullable = false)
     private Estante estante;
 }
