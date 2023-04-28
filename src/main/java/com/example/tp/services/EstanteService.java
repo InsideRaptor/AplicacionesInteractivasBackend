@@ -1,5 +1,6 @@
 package com.example.tp.services;
 
+import com.example.tp.exceptions.InternalServerException;
 import com.example.tp.models.Estante;
 import com.example.tp.repositories.EstanteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +23,8 @@ public class EstanteService {
         this.er = er;
     }
 
-    public ResponseEntity addEstante(Estante est) {
-        try {
-            er.save(est);
-            return ResponseEntity.status(CREATED).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
-        }
+    public Estante addEstante(Estante est) {
+        return er.save(est);
     }
 
     public List<Estante> getAll() {
@@ -36,30 +32,35 @@ public class EstanteService {
     }
 
     public Integer getTotal() {
-        return er.findAll().size();
-    }
-
-    public ResponseEntity updateEstante(Integer id, Estante estante) {
         try {
-            Estante est = er.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Estante no encontrado"));
-            est.setCapacidad(est.getCapacidad());
-            est.setListaLibros(est.getListaLibros());
-            return ResponseEntity.ok(er.save(est));
+            return er.findAll().size();
         } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
+            throw new InternalServerException("Hubo un error al recuperar el total de estantes");
         }
     }
 
-    public ResponseEntity deleteEstante(Integer id) {
-        try {
-            er.deleteById(id);
-            return ResponseEntity.status(OK).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
+    public Estante updateEstante(Integer id, Estante estante) {
+        Estante e = er.findById(id).orElse(null);
+        if (e != null) {
+            e.setCapacidad(estante.getCapacidad());
+            er.save(e);
         }
+        return e;
+    }
+
+    public ResponseEntity<String> deleteEstante(Integer id) {
+        if (er.existsById(id)) {
+            try {
+                er.deleteById(id);
+                return ResponseEntity.status(OK).body("Estante " + id + " eliminado con éxito");
+            } catch (Exception e) {
+                return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+            }
+        }
+        return ResponseEntity.status(NOT_FOUND).body("Estante " + id + " no encontrado");
     }
 
     public Estante getEstante(Integer id) {
-        return er.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Estante no encontrado"));
+        return er.findById(id).orElse(null);
     }
 }
