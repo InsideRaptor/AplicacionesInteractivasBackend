@@ -1,5 +1,6 @@
 package com.example.tp.controllers;
 
+import com.example.tp.exceptions.*;
 import com.example.tp.models.Libro;
 import com.example.tp.models.LibroDTO;
 import com.example.tp.services.LibroService;
@@ -8,7 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequestMapping("/libro")
@@ -17,14 +22,63 @@ public class LibroController {
     @Autowired
     private LibroService ls;
 
-    @PostMapping("")
-    public ResponseEntity addLibro(@RequestBody final @NotNull Libro l) {
-        return ls.addLibro(l);
+    private record LibroResponse(Libro libro, String message) {
     }
 
-    @GetMapping("/getAll")
-    public List<Libro> getAll() {
-        return ls.getAll();
+    private record LibroListResponse(List<Libro> libros, String message) {
+    }
+
+    public record LibroListResponseDTO(List<LibroDTO.LibroDTOMinimal> libros) {
+    }
+
+    private List<String> validateLibro(Libro l) {
+        List<String> errors = new ArrayList<>();
+        if (l.getTitulo() == null || l.getTitulo().isEmpty()) {
+            errors.add("El título del libro es requerido");
+        }
+        if (l.getDescripcion() == null || l.getDescripcion().isEmpty()) {
+            errors.add("La descripción del libro es requerida");
+        }
+        if (l.getAutor() == null || l.getAutor().isEmpty()) {
+            errors.add("El autor del libro es requerido");
+        }
+        if (l.getEditorial() == null || l.getEditorial().isEmpty()) {
+            errors.add("La editorial del libro es requerida");
+        }
+        if (l.getEstante() == null) {
+            errors.add("El estante del libro es requerido");
+        }
+        return errors;
+    }
+
+    @PostMapping("/addLibro")
+    public ResponseEntity<Object> addLibro(@RequestBody final @NotNull Libro l) {
+        List<String> errors = validateLibro(l);
+        try {
+            if (!errors.isEmpty()) {
+                String errorMessage = String.join("\n", errors);
+                throw new BadRequestException(errorMessage);
+            }
+            LibroResponse response = new LibroResponse(ls.addLibro(l), "Libro cargado con éxito");
+            return ResponseEntity.status(OK).body(response);
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(BAD_REQUEST).body("Hubo un error al cargar el libro");
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
+    }
+
+    @GetMapping("")
+    public ResponseEntity<LibroListResponse> getAll() {
+        try {
+            LibroListResponse response = new LibroListResponse(ls.getAll(), "Libros recuperados con éxito");
+            return ResponseEntity.status(OK).body(response);
+        } catch (Exception e) {
+            LibroListResponse response = new LibroListResponse(null, "Hubo un error al recuperar los libros");
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @GetMapping("/total")
@@ -33,22 +87,42 @@ public class LibroController {
     }
 
     @PostMapping("/{id}/update")
-    public ResponseEntity updateLibro(@PathVariable final @NotNull Integer id, @RequestBody final @NotNull Libro l) {
-        return ls.updateLibro(id, l);
+    public ResponseEntity<Object> updateLibro(@PathVariable final @NotNull Integer id, @RequestBody final @NotNull Libro l) {
+        try {
+            Libro updatedLibro = ls.updateLibro(id, l);
+            if (updatedLibro == null) {
+                return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
+            }
+            LibroResponse response = new LibroResponse(updatedLibro, "Libro " + id + " actualizado con éxito");
+            return ResponseEntity.status(OK).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
     }
 
     @PostMapping("/{id}/delete")
-    public ResponseEntity deleteLibro(@PathVariable final @NotNull Integer id) {
+    public ResponseEntity<String> deleteLibro(@PathVariable final @NotNull Integer id) {
         return ls.deleteLibro(id);
     }
 
     @GetMapping("/{id}")
-    public Libro getLibro(@PathVariable final @NotNull Integer id) {
-        return ls.getLibro(id);
+    public ResponseEntity<Object> getLibro(@PathVariable final @NotNull Integer id) {
+        try {
+            Libro libro = ls.getLibro(id);
+            if (libro == null) {
+                return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
+            }
+            LibroResponse response = new LibroResponse(ls.getLibro(id), "Libro " + id + " recuperado con éxito");
+            return ResponseEntity.status(OK).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
     }
 
     @GetMapping("/autor/{autor}")
-    public LibroDTO getByAutor(@PathVariable final @NotNull String autor) {
-        return ls.getByAutor(autor);
+    public ResponseEntity<Object> getByAutor(@PathVariable final @NotNull String autor) {
+        Optional<List<LibroDTO.LibroDTOMinimal>> optionalLibros = ls.getByAutor(autor);
+        return optionalLibros.<ResponseEntity<Object>>map(libroDTOMinimals -> new ResponseEntity<>(new LibroListResponseDTO(libroDTOMinimals), OK))
+                .orElseGet(() -> ResponseEntity.status(NOT_FOUND).body("No se encontró ningún libro con el autor: " + autor));
     }
 }

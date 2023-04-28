@@ -1,18 +1,19 @@
 package com.example.tp.services;
 
+import com.example.tp.exceptions.*;
 import com.example.tp.models.Libro;
 import com.example.tp.models.LibroDTO;
 import com.example.tp.repositories.LibroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 public class LibroService {
@@ -24,13 +25,8 @@ public class LibroService {
         this.lr = lr;
     }
 
-    public ResponseEntity addLibro(Libro l) {
-        try {
-            lr.save(l);
-            return ResponseEntity.status(CREATED).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
-        }
+    public Libro addLibro(Libro l) {
+        return lr.save(l);
     }
 
     public List<Libro> getAll() {
@@ -38,36 +34,60 @@ public class LibroService {
     }
 
     public Integer getTotal() {
-        return lr.findAll().size();
+        try {
+            return lr.findAll().size();
+        } catch (Exception e) {
+            throw new InternalServerException("Hubo un error al recuperar el total de libros");
+        }
     }
 
-    public ResponseEntity updateLibro(Integer id, Libro libro) {
-        try {
-            Libro l = lr.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
-            l.setTitulo(l.getTitulo());
-            l.setAutor(l.getAutor());
-            l.setEditorial(l.getEditorial());
+    public Libro updateLibro(Integer id, Libro libro) {
+        Libro l = lr.findById(id).orElse(null);
+        if (l != null) {
+            l.setTitulo(libro.getTitulo());
+            l.setDescripcion(libro.getDescripcion());
+            l.setAutor(libro.getAutor());
+            l.setEditorial(libro.getEditorial());
+            l.setEstante(libro.getEstante());
             lr.save(l);
-            return ResponseEntity.ok(lr.save(l));
-        } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
         }
+        return l;
     }
 
-    public ResponseEntity deleteLibro(Integer id) {
-        try {
-            lr.deleteById(id);
-            return ResponseEntity.status(OK).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).build();
+    public ResponseEntity<String> deleteLibro(Integer id) {
+        if (lr.existsById(id)) {
+            try {
+                lr.deleteById(id);
+                return ResponseEntity.status(OK).body("Libro " + id + " eliminado con éxito");
+            } catch (Exception e) {
+                return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+            }
         }
+        return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
     }
 
     public Libro getLibro(Integer id) {
-        return lr.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro" + getLibro(id).getTitulo() + "no encontrado"));
+        return lr.findById(id).orElse(null);
     }
 
-    public LibroDTO getByAutor(String autor) {
-        return (LibroDTO) Arrays.stream(lr.findAll().toArray()).filter(l -> ((Libro) l).getAutor().equals(autor)).findFirst().orElseThrow(() -> new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Libro no encontrado"));
+    private static class LibroMapper {
+        public static LibroDTO.LibroDTOMinimal toLibroDTOMinimal(Libro libro) {
+            return new LibroDTO.LibroDTOMinimal(
+                    libro.getId(),
+                    libro.getTitulo(),
+                    libro.getAutor()
+            );
+        }
+    }
+
+    public Optional<List<LibroDTO.LibroDTOMinimal>> getByAutor(String autor) {
+        List<Libro> libros = lr.findByAutor(autor);
+        if (libros.isEmpty()) {
+            return Optional.empty();
+        }
+        List<LibroDTO.LibroDTOMinimal> libroDTOMinimals = libros.stream()
+                .map(LibroMapper::toLibroDTOMinimal)
+                .collect(Collectors.toList());
+        return Optional.of(libroDTOMinimals);
     }
 }
