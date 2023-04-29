@@ -71,11 +71,11 @@ public class LibroController {
     }
 
     @GetMapping("")
-    public ResponseEntity<LibroListResponse> getAll() {
+    public ResponseEntity<Object> getAll() {
         try {
             return ResponseEntity.status(OK).body(new LibroListResponse(ls.getAll(), "Libros recuperados con éxito"));
         } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new LibroListResponse(null, "Hubo un error al recuperar los libros"));
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Hubo un error al recuperar los libros");
         }
     }
 
