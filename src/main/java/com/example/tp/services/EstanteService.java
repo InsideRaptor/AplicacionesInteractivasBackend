@@ -4,10 +4,8 @@ import com.example.tp.exceptions.InternalServerException;
 import com.example.tp.models.Estante;
 import com.example.tp.repositories.EstanteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -42,7 +40,9 @@ public class EstanteService {
     public Estante updateEstante(Integer id, Estante estante) {
         Estante e = er.findById(id).orElse(null);
         if (e != null) {
-            e.setCapacidad(estante.getCapacidad());
+            if (estante.getCapacidad() != null) {
+                e.setCapacidad(estante.getCapacidad());
+            }
             er.save(e);
         }
         return e;

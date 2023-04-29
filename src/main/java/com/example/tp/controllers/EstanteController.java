@@ -42,8 +42,7 @@ public class EstanteController {
                 String errorMessage = String.join("\n", errors);
                 throw new BadRequestException(errorMessage);
             }
-            EstanteResponse response = new EstanteResponse(es.addEstante(e), "Estante cargado con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new EstanteResponse(es.addEstante(e), "Estante cargado con éxito"));
         } catch (BadRequestException ex) {
             return ResponseEntity.status(BAD_REQUEST).body(ex.getMessage());
         } catch (IllegalArgumentException ex) {
@@ -56,11 +55,9 @@ public class EstanteController {
     @GetMapping("")
     public ResponseEntity<EstanteListResponse> getAll() {
         try {
-            EstanteListResponse response = new EstanteListResponse(es.getAll(), "Estantes recuperados con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new EstanteListResponse(es.getAll(), "Estantes recuperados con éxito"));
         } catch (Exception e) {
-            EstanteListResponse response = new EstanteListResponse(null, "Hubo un error al recuperar los estantes");
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new EstanteListResponse(null, "Hubo un error al recuperar los estantes"));
         }
     }
 
@@ -76,8 +73,7 @@ public class EstanteController {
             if (updatedEstante == null) {
                 return ResponseEntity.status(NOT_FOUND).body("Estante " + id + " no encontrado");
             }
-            EstanteResponse response = new EstanteResponse(updatedEstante, "Estante " + id + " actualizado con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new EstanteResponse(updatedEstante, "Estante " + id + " actualizado con éxito"));
         } catch (Exception ex) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
@@ -96,8 +92,7 @@ public class EstanteController {
             if (estante == null) {
                 return ResponseEntity.status(NOT_FOUND).body("Estante " + id + " no encontrado");
             }
-            EstanteResponse response = new EstanteResponse(es.getEstante(id), "Estante " + id + " recuperado con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new EstanteResponse(es.getEstante(id), "Estante " + id + " recuperado con éxito"));
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }

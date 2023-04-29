@@ -7,6 +7,7 @@ import com.example.tp.services.LibroService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -59,8 +60,7 @@ public class LibroController {
                 String errorMessage = String.join("\n", errors);
                 throw new BadRequestException(errorMessage);
             }
-            LibroResponse response = new LibroResponse(ls.addLibro(l), "Libro cargado con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new LibroResponse(ls.addLibro(l), "Libro cargado con éxito"));
         } catch (BadRequestException e) {
             return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -73,11 +73,9 @@ public class LibroController {
     @GetMapping("")
     public ResponseEntity<LibroListResponse> getAll() {
         try {
-            LibroListResponse response = new LibroListResponse(ls.getAll(), "Libros recuperados con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new LibroListResponse(ls.getAll(), "Libros recuperados con éxito"));
         } catch (Exception e) {
-            LibroListResponse response = new LibroListResponse(null, "Hubo un error al recuperar los libros");
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new LibroListResponse(null, "Hubo un error al recuperar los libros"));
         }
     }
 
@@ -93,8 +91,7 @@ public class LibroController {
             if (updatedLibro == null) {
                 return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
             }
-            LibroResponse response = new LibroResponse(updatedLibro, "Libro " + id + " actualizado con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new LibroResponse(updatedLibro, "Libro " + id + " actualizado con éxito"));
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
@@ -112,8 +109,7 @@ public class LibroController {
             if (libro == null) {
                 return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
             }
-            LibroResponse response = new LibroResponse(ls.getLibro(id), "Libro " + id + " recuperado con éxito");
-            return ResponseEntity.status(OK).body(response);
+            return ResponseEntity.status(OK).body(new LibroResponse(ls.getLibro(id), "Libro " + id + " recuperado con éxito"));
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }

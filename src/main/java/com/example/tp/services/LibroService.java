@@ -44,11 +44,21 @@ public class LibroService {
     public Libro updateLibro(Integer id, Libro libro) {
         Libro l = lr.findById(id).orElse(null);
         if (l != null) {
-            l.setTitulo(libro.getTitulo());
-            l.setDescripcion(libro.getDescripcion());
-            l.setAutor(libro.getAutor());
-            l.setEditorial(libro.getEditorial());
-            l.setEstante(libro.getEstante());
+            if (libro.getTitulo() != null) {
+                l.setTitulo(libro.getTitulo());
+            }
+            if (libro.getDescripcion() != null) {
+                l.setDescripcion(libro.getDescripcion());
+            }
+            if (libro.getAutor() != null) {
+                l.setAutor(libro.getAutor());
+            }
+            if (libro.getEditorial() != null) {
+                l.setEditorial(libro.getEditorial());
+            }
+            if (libro.getEstante() != null) {
+                l.setEstante(libro.getEstante());
+            }
             lr.save(l);
         }
         return l;
