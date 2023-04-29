@@ -53,11 +53,11 @@ public class EstanteController {
     }
 
     @GetMapping("")
-    public ResponseEntity<EstanteListResponse> getAll() {
+    public ResponseEntity<Object> getAll() {
         try {
             return ResponseEntity.status(OK).body(new EstanteListResponse(es.getAll(), "Estantes recuperados con éxito"));
         } catch (Exception e) {
-            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new EstanteListResponse(null, "Hubo un error al recuperar los estantes"));
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Hubo un error al recuperar los estantes");
         }
     }
 
