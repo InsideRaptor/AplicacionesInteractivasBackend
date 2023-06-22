@@ -7,7 +7,6 @@ import com.example.tp.services.LibroService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
+@CrossOrigin("http://localhost:4200")
 @RequestMapping("/libro")
 public class LibroController {
 

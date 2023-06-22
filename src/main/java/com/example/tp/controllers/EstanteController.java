@@ -14,6 +14,7 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
+@CrossOrigin("http://localhost:4200")
 @RequestMapping("/estante")
 public class EstanteController {
 
