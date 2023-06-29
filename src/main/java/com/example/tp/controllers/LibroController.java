@@ -60,7 +60,8 @@ public class LibroController {
                 String errorMessage = String.join("\n", errors);
                 throw new BadRequestException(errorMessage);
             }
-            return ResponseEntity.status(OK).body(new LibroResponse(ls.addLibro(l), "Libro cargado con éxito"));
+            ls.addLibro(l);
+            return ResponseEntity.status(OK).body("Libro cargado con éxito");
         } catch (BadRequestException e) {
             return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
         } catch (IllegalArgumentException e) {
