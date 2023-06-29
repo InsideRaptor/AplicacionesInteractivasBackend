@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -43,7 +45,11 @@ public class EstanteController {
                 String errorMessage = String.join("\n", errors);
                 throw new BadRequestException(errorMessage);
             }
-            return ResponseEntity.status(OK).body(new EstanteResponse(es.addEstante(e), "Estante cargado con éxito"));
+            es.addEstante(e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Estante cargado con éxito");
+            return ResponseEntity.status(OK).body(response);
         } catch (BadRequestException ex) {
             return ResponseEntity.status(BAD_REQUEST).body(ex.getMessage());
         } catch (IllegalArgumentException ex) {
@@ -74,7 +80,10 @@ public class EstanteController {
             if (updatedEstante == null) {
                 return ResponseEntity.status(NOT_FOUND).body("Estante " + id + " no encontrado");
             }
-            return ResponseEntity.status(OK).body(new EstanteResponse(updatedEstante, "Estante " + id + " actualizado con éxito"));
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Estante actualizado con éxito");
+            return ResponseEntity.status(OK).body(response);
         } catch (Exception ex) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
@@ -82,8 +91,14 @@ public class EstanteController {
 
 
     @PostMapping("/{id}/delete")
-    public ResponseEntity<String> deleteEstante(@PathVariable final @NotNull Integer id) {
-        return es.deleteEstante(id);
+    public ResponseEntity<Object> deleteEstante(@PathVariable final @NotNull Integer id) {
+        try {
+            return es.deleteEstante(id);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(BAD_REQUEST).body("Hubo un error al borrar el estante");
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
     }
 
     @GetMapping("/{id}")

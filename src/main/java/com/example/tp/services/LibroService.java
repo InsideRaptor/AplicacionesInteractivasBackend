@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import static org.springframework.http.HttpStatus.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,8 +27,8 @@ public class LibroService {
         this.lr = lr;
     }
 
-    public Libro addLibro(Libro l) {
-        return lr.save(l);
+    public void addLibro(Libro l) {
+        lr.save(l);
     }
 
     public List<Libro> getAll() {
@@ -64,16 +66,22 @@ public class LibroService {
         return l;
     }
 
-    public ResponseEntity<String> deleteLibro(Integer id) {
+    public ResponseEntity<Object> deleteLibro(Integer id) {
         if (lr.existsById(id)) {
             try {
                 lr.deleteById(id);
-                return ResponseEntity.status(OK).body("Libro " + id + " eliminado con éxito");
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "Libro eliminado con éxito");
+                return ResponseEntity.status(OK).body(response);
             } catch (Exception e) {
                 return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
             }
         }
-        return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
+        Map<String, Object> responseNotFound = new HashMap<>();
+        responseNotFound.put("success", false);
+        responseNotFound.put("message", "Libro no encontrado");
+        return ResponseEntity.status(NOT_FOUND).body(responseNotFound);
     }
 
     public Libro getLibro(Integer id) {

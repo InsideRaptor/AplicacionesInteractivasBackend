@@ -9,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -61,7 +59,10 @@ public class LibroController {
                 throw new BadRequestException(errorMessage);
             }
             ls.addLibro(l);
-            return ResponseEntity.status(OK).body("Libro cargado con éxito");
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Libro cargado con éxito");
+            return ResponseEntity.status(OK).body(response);
         } catch (BadRequestException e) {
             return ResponseEntity.status(BAD_REQUEST).body(e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -74,7 +75,7 @@ public class LibroController {
     @GetMapping("")
     public ResponseEntity<Object> getAll() {
         try {
-            return ResponseEntity.status(OK).body(new LibroListResponse(ls.getAll(), "Libros recuperados con éxito"));
+            return ResponseEntity.status(OK).body(ls.getAll());
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Hubo un error al recuperar los libros");
         }
@@ -92,15 +93,24 @@ public class LibroController {
             if (updatedLibro == null) {
                 return ResponseEntity.status(NOT_FOUND).body("Libro " + id + " no encontrado");
             }
-            return ResponseEntity.status(OK).body(new LibroResponse(updatedLibro, "Libro " + id + " actualizado con éxito"));
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Libro actualizado con éxito");
+            return ResponseEntity.status(OK).body(response);
         } catch (Exception e) {
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
         }
     }
 
     @PostMapping("/{id}/delete")
-    public ResponseEntity<String> deleteLibro(@PathVariable final @NotNull Integer id) {
-        return ls.deleteLibro(id);
+    public ResponseEntity<Object> deleteLibro(@PathVariable final @NotNull Integer id) {
+        try {
+            return ls.deleteLibro(id);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(BAD_REQUEST).body("Hubo un error al borrar el libro");
+        } catch (Exception e) {
+            return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
+        }
     }
 
     @GetMapping("/{id}")

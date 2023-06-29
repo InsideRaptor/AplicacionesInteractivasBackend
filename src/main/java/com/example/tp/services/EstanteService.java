@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -21,8 +23,8 @@ public class EstanteService {
         this.er = er;
     }
 
-    public Estante addEstante(Estante est) {
-        return er.save(est);
+    public void addEstante(Estante est) {
+        er.save(est);
     }
 
     public List<Estante> getAll() {
@@ -48,16 +50,22 @@ public class EstanteService {
         return e;
     }
 
-    public ResponseEntity<String> deleteEstante(Integer id) {
+    public ResponseEntity<Object> deleteEstante(Integer id) {
         if (er.existsById(id)) {
             try {
                 er.deleteById(id);
-                return ResponseEntity.status(OK).body("Estante " + id + " eliminado con éxito");
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "Estante eliminado con éxito");
+                return ResponseEntity.status(OK).body(response);
             } catch (Exception e) {
                 return ResponseEntity.status(INTERNAL_SERVER_ERROR).body("Internal Server Error");
             }
         }
-        return ResponseEntity.status(NOT_FOUND).body("Estante " + id + " no encontrado");
+        Map<String, Object> responseNotFound = new HashMap<>();
+        responseNotFound.put("success", false);
+        responseNotFound.put("message", "Estante no encontrado");
+        return ResponseEntity.status(NOT_FOUND).body(responseNotFound);
     }
 
     public Estante getEstante(Integer id) {
